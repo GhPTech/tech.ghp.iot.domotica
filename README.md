@@ -166,6 +166,80 @@ The application is running at the address
     
 By pushing the button *To Upper* will transform the string inserted in the dialog window to upper case.
 
+###Debugging
+
+Debugging can be done by setting *breakpoints* and *single step*. A new bundle is generated and gets deployed with every change of the bundle. If changes are made to the code (and saved), a new bundle is generated and gets deployed. If more requirements are defined (or removed) in the *bndrun* file, the respective bundels get deployed (or stopped). 
+
+For example if a change is made to the code to return *lower case* string instead of *upper case*
+
+	 public String getUpper(RESTRequest req, String string) throws Exception {
+			return string.toLowerCase();
+	}
+
+the running framework will include this change.
+
+N.B.
+A warning from Eclipse informs about the changes. The *Continue* button should be pushed.
+
+If there are Javascript or html fragment changes, the page in the browser needs to be refreshed to reload the changes.
+
+Every application project has a *[project_name].bndrun* file and a *debug.bndrun* file.
+
+The principle 'Don't Repeat Yourself (DRY)' is applied. The *debug.bndrun* file inherits from the *[project_name].bndrun* file (information already available in the later file is aslo available in the former file) and it includes additional bundles supporting the debugging process. 
+
+As *debug.bndrun* inherits from *[project_name].bndrun*, it has no specified requirements in *Run Requirements*. However, the listed bundels to be added to the debug mode runtime  (*Run Bundles*) should be obtained by pushing *Resolve* button. This will add bundels like Web Console, XRay, etc.
+
+Once the *debug.bndrun* file is saved, the application can be run in debug mode by pushing the button *Debug OSGi*. This run in trace mode, which provides detailed information about the launch process and the ongoing updates. This is triggered by the *-runtrace* flag. This can be set to *false* or removed, if this information is not required.
+
+The *Web Console* can be accessed at the address:
+
+    http://192.168.x.xx:8080/system/console
+
+The *ID* and the *password* are defined by Apache Felix as
+
+    User id: admin
+    Password: admin
+    
+These debugging tools provide valuable insights about the running application. For example, a visualisation of the service layer can be obtained with the *XRay* web console plugin. The running system can be inspected on a browser at the address:
+
+	 http://192.168.x.xx:8080/system/console/xray
+	 
+![XRay](http://enroute.osgi.org/img/tutorial_base/debug-xray-1.png "A visualisation of the service layer can be obtained with the *XRay* web console plugin. ")
+
+The *triangle* represents the *service*. Connections to the *point* of the triangle indicate the *registration* (points to the object that receives the method calls from the service users). The *base* of the triangle indicate the *client(s)* (call the methods of the service). The *sides* of the triangle indicate *listeners* of the service.
+
+![service symbols](http://enroute.osgi.org/img/tutorial_base/debug-service-0.png "Graphical representation of services in XRay")
+
+The following color codes are used:
+
+* yellow: service is registered and in use
+* white, solid border: service is registered and not in use
+* white, dashed border: service is not registered and needed by other bundles
+* red: serious failure of the service
+* orange: service is exported or imported  
+
+The *triangles* represent service *types*, not *instances*.
+
+*XRay* also tracks eventual errors logged by the bundles. It marks the bundle with a warning sign and the log message.
+
+Various *tabs* and *subtabs* can be selected in order to get an overview of the running framework:
+
+* Main
+	* HTTP Service
+	* X-Ray
+* OSGi
+	* Bundles
+	* Configurations
+	* Log Service
+	* Services
+* Web Console 
+	* Licenses
+	* System Information
+	
+The *XRay* plugin returns a page with *Javascript* that pulls the server at given time intervals. The server returns the data which is rendered by a javascript library (d3.js).
+
+Each service type is represented by a rounded corner yellow box.
+
 ###Executable
 
 In order to run the application on an arbitrary environment, an executable JAR can be 
@@ -566,7 +640,7 @@ In order to trigger the build on *Travis IC* server, a change in the *tech.ghp.u
 
 The change is *saved* and *pushed* to the *GitHub* server. The *Travis IC* notices the difference and launches a new automatic build of the repository.
 
-###Remote Debugging
+##Remote Debugging
 
 The *OSGi enRoute Application* creates also the files *tech.ghp.iot.bndrun* and *debug.bndrun*. The later inherits the former and adds debug bundles. The default (OSGi) port for *Http Server* is *8080*. However this can be changed in the *tech.ghp.iot.bndrun* file. For example to use the port *9090* for the *Http Server*, the following line needs to be added from the *Source* tab of the *tech.ghp.iot.bndrun*:
 
@@ -581,7 +655,7 @@ Additionally *-runpath* and *-runremote*  need to be specified:
 				host=192.168.x.xx; \
 				shell=-1
 				
-###Connecting to Raspberry Pi
+##Connecting to Raspberry Pi
 
 To connect to the *Raspebery Pi* the following command is used:
 
@@ -613,113 +687,218 @@ The *-a* option indicates that *bndremote* should listen to all interfaces, not 
 
 If the interfaces to listen to are not specified, only the agent from the localhost (same machine) is used.
 
-###Rapberry Pi Command Code
+##Command Package
 
-An instruction to send a message to Rapberry Pi is coded to the *DomoticaCommand* class: 
+The *OSGi enRoute* template creates a class *DomoticaApplication* within the package *tech.ghp.iot.domotica.application*, which is a web application with REST. However, another component is created to communicate with the hardware (Rapberry Pi). 
 
+From the main menu select 
+
+*File/New/Package*
+
+and name the package *tech.ghp.iot.domotica.command*
+
+Within this package create a new Java class *DomoticaCommand*, which has the following code by default:
+
+    package tech.ghp.iot.domotica.command;
+
+    public class DomoticaCommand {
+
+	 }
+
+The *DomoticaCommand* package has to be added to the *Private Packages* list of the *bnd.bnd* file.
+
+###Sending a message to Raspberry Pi
+
+A simple way to interact with hardware is to send a message to the remote agent. 
+
+To send this message to Raspbery Pi, the following code is implemented in the class 'DomoticaCommand'
+
+    package tech.ghp.iot.domotica.command;
+    
+    import org.osgi.service.component.annotations.Activate;
+	import org.osgi.service.component.annotations.Component;
+	import org.osgi.service.component.annotations.Deactivate;
+    
     @Component
-	public class DomoticaCommand {
-
-			@Activate
+    public class DomoticaCommand {
+    
+    		@Activate
 			void activate() {
-				System.out.println("Hello Raspberry Pi");
+					System.out.println("Hello Rasberry Pi");
 			}
 
 			@Deactivate
-			void deactivate() {
-				System.out.println("Goodbye Raspberry Pi");
+	 		void deactivate() {
+					System.out.println("Goodbye Rasberry Pi");
 			}
-	}
 
-###Defining a Runtime
+	 }
 
-The requirements of the *runtime* need to be defined in the *tech.ghp.iot.bndrun* file. These can be defined from the *Run* tab. By default, the requirements are specified via annotations, the application *tech.ghp.iot.domotica.application* is listed in the initial requirements. Other bundles can be added from the *Browse Repos* list (the left side of the *Run* tab). 
+The dependencies of this application to be *Resolved* from the *Run* tab of the *debug.bndrun* (*tech.ghp.iot.domotica.bndrun*) file. 
 
-As the *Run Requirements* list is complete, the *Resolve* button needs to be pushed in order to get the bundles required by the runtime. This will set the *Run Bundles* list. The *-runbundles* section of the script is overwritten every time the *Resolve* button is pushed (manual editing of the *-runbundles* section would be lost).
+To launch the application, from the context menu (right click) of the *debug.bndrun* file, select
 
-Save the file *tech.ghp.iot.domotica.bndrun*. 
+*@Debug As/Bnd Native Launcher*
 
-Push the button *Debug OSGi* at the right top of the window.
+This cause *bnd* to start the debugger and look for a remote agent on the specified host.
 
-The application is running at the address 
+N.B. Rasberry Pi (IP 192.168.x.xx) should run running *bndremote* and displaying the message: 
 
-    http://192.168.x.xx:8080/tech.ghp.iot.domotica
+The ssh shell of the Raspbery Pi should display the following message:
+
+    Listening for transport dt_socket at address: 1044
+
+    ____________________________
+	Welcome to Apache Felix Gogo
+
+	 g! 2016-04-12 10:52:43.887:INFO::pool-3-thread-2: Logging initialized @2713135ms
+	2016-04-12 10:52:44.695:INFO:oejs.Server:pool-3-thread-2: jetty-9.2.12.v20150709
+	2016-04-12 10:52:45.937:INFO:oejsh.ContextHandler:pool-3-thread-2: Started o.e.j.s.ServletContextHandler@1b77ed6{/,null,AVAILABLE}
+	2016-04-12 10:52:45.945:INFO:oejs.Server:pool-3-thread-2: Started @2715197ms
+	2016-04-12 10:52:46.286:INFO:oejs.ServerConnector:pool-3-thread-2: Started ServerConnector@782931{HTTP/1.1}{0.0.0.0:8080}
+	[INFO] Started Jetty 9.2.12.v20150709 at port(s) HTTP:8080 on context path /
+	Hello Rasberry Pi
+
+###Continous update
+
+While the remote agent is running, changes can be made to the application. For example we can modify the message sent to Raspberry Pi.
+
+	 @Activate
+			void activate() {
+					System.out.println("Hello Rasberry Pi");
+					System.out.println("What is your serial number?");
+			}
+			
+As the changes are saved, the launcher reloads and calculates a *delta* of the proprieties file (bnd.bnd) and applies it to the running framework and the updated messages are update on the display
+
+	 Hello Rasberry Pi
+	 What is your serial number?
+
+##Getting information from Raspberry Pi
+
+###The GpioController
+
+In order to get the hardware information (such as serial number, model, etc.), the bundle *osgi.enroute.iot.pi.provider* is used. This bundle contains the [Pi4j](http://pi4j.com) library, which is based on [WiringPi](http://wiringpi.com), a native code library to control the *BCM2835* chip from Raspberry Pi.
+
+The bundle *osgi.enroute.iot.pi.provider* can be found in the *Respositories* list from the *Run* tab of the *bnd.bnd* file. To add it on the *Run Requirements* list, the *drag and drop* function of Eclipse can be used. Alternatively, it can be added manually from the *Source* tab:
+
+    -runrequires:\
+    osgi.identity;filter:='(osgi.identity=tech.ghp.iot.domotica.application)',\
+    osgi.identity;filter:='(osgi.identity=osgi.enroute.iot.pi.provider)'
+
+
+Once this modification is saved to the file *bnd.bnd*, from the *debug.bndrun* file, the dependencies need to be *Resolved*.
+
+###Access to GpioController types
+
+The *GpioController* types also need to be added to the *buidpath* of the 'bnd.bnd' file.
+
+	 -buildpath: \
+			osgi.enroute.base.api,\
+			osgi.enroute.logger.simple.provider,\
+			osgi.enroute.web.simple.provider;version=1.2,\
+			osgi.enroute.iot.circuit.provider,\
+			osgi.enroute.iot.pi.provider
+			
+			
+###Throwing exceptions
+
+If an event that disturbs the execution of a method occurs, the user should be notified. 
+
+![Throwing Exception](http://i.stack.imgur.com/4ppVR.gif "Throwing Exceptions")
+
+Notification of these exceptions can be coded as:
+
+    void activate() throws Exception {
+    ...
+    }
     
-By pushing the button *To Upper* will transform the string inserted in the dialog window to upper case.
-
-###Debugging
-
-Debugging can be done by setting *breakpoints* and *single step*. A new bundle is generated and gets deployed with every change of the bundle. If changes are made to the code (and saved), a new bundle is generated and gets deployed. If more requirements are defined (or removed) in the *bndrun* file, the respective bundels get deployed (or stopped). 
-
-For example if a change is made to the code to return *lower case* string instead of *upper case*
-
-	 public String getUpper(RESTRequest req, String string) throws Exception {
-			return string.toLowerCase();
-	}
-
-the running framework will include this change.
-
-N.B.
-A warning from Eclipse informs about the changes. The *Continue* button should be pushed.
-
-If there are Javascript or html fragment changes, the page in the browser needs to be refreshed to reload the changes.
-
-Every application project has a *[project_name].bndrun* file and a *debug.bndrun* file.
-
-The principle 'Don't Repeat Yourself (DRY)' is applied. The *debug.bndrun* file inherits from the *[project_name].bndrun* file (information already available in the later file is aslo available in the former file) and it includes additional bundles supporting the debugging process. 
-
-As *debug.bndrun* inherits from *[project_name].bndrun*, it has no specified requirements in *Run Requirements*. However, the listed bundels to be added to the debug mode runtime  (*Run Bundles*) should be obtained by pushing *Resolve* button. This will add bundels like Web Console, XRay, etc.
-
-Once the *debug.bndrun* file is saved, the application can be run in debug mode by pushing the button *Debug OSGi*. This run in trace mode, which provides detailed information about the launch process and the ongoing updates. This is triggered by the *-runtrace* flag. This can be set to *false* or removed, if this information is not required.
-
-The *Web Console* can be accessed at the address:
-
-    http://192.168.x.xx:8080/system/console
-
-The *ID* and the *password* are defined by Apache Felix as
-
-    User id: admin
-    Password: admin
+###Getting serial number
     
-These debugging tools provide valuable insights about the running application. For example, a visualisation of the service layer can be obtained with the *XRay* web console plugin. The running system can be inspected on a browser at the address:
-
-	 http://192.168.x.xx:8080/system/console/xray
+The serial number can be obtained by the following code line:
 	 
-![XRay](http://enroute.osgi.org/img/tutorial_base/debug-xray-1.png "A visualisation of the service layer can be obtained with the *XRay* web console plugin. ")
-
-The *triangle* represents the *service*. Connections to the *point* of the triangle indicate the *registration* (points to the object that receives the method calls from the service users). The *base* of the triangle indicate the *client(s)* (call the methods of the service). The *sides* of the triangle indicate *listeners* of the service.
-
-![service symbols](http://enroute.osgi.org/img/tutorial_base/debug-service-0.png "Graphical representation of services in XRay")
-
-The following color codes are used:
-
-* yellow: service is registered and in use
-* white, solid border: service is registered and not in use
-* white, dashed border: service is not registered and needed by other bundles
-* red: serious failure of the service
-* orange: service is exported or imported  
-
-The *triangles* represent service *types*, not *instances*.
-
-*XRay* also tracks eventual errors logged by the bundles. It marks the bundle with a warning sign and the log message.
-
-Various *tabs* and *subtabs* can be selected in order to get an overview of the running framework:
-
-* Main
-	* HTTP Service
-	* X-Ray
-* OSGi
-	* Bundles
-	* Configurations
-	* Log Service
-	* Services
-* Web Console 
-	* Licenses
-	* System Information
+    ...
+	System.out.println("Serial number is " + SystemInfo.getSerial());	
+	...		
 	
-The *XRay* plugin returns a page with *Javascript* that pulls the server at given time intervals. The server returns the data which is rendered by a javascript library (d3.js).
+###Getting model
+    
+The model can be obtained by the following code line:
+	 
+    ...
+	System.out.println("Model: " + SystemInfo.getBoardType().name());
+	...		
 
-Each service type is represented by a rounded corner yellow box.	 
+##Controlling hardware with Raspberry Pi
+
+A simple example of hardware control with Raspberry Pi is blinking a LED. The schema for this scenario is shown here below:
+
+![Blinking LED schema](http://enroute.osgi.org/img/tutorial_iot/exploring-led-schema-1.png "Blinking LED schema (with Fritzing)")
+
+The positive side of the LED is connected to the *GPIO0* pin of the Raspberry Pi. To protect this pin (and the LED), a *220\Omega* resistor is connected to the negative side of the LED, then connected to the *Ground* of the Raspberry Pi. As the voltage supplied by pin *GPIO0* is *3.3V*, the current passing through the circuit is limited to *15mA*.
+
+The *Pi4J* map of *Raspbery Pi model B+* *GPIOs* is shown here below:
+
+![Raspberry Pi GPIO ](http://pi4j.com/images/j8header-b-plus.png "Raspberry Pi Model B+ GPIO")
+
+Note that *Pi4j* GPIOs numbering differs from that of *Raspberry*.
+
+The experimental model of the circuit above can be realised with a breadboard as shown in the image below. 
+
+![Blinking LED breadboard](http://enroute.osgi.org/img/tutorial_iot/exploring-led-breadboard-1.png "Blinking LED breadboard")
+
+Note that LEDs (Light Emitting Diode) are unidirectional (pass electricity only in one direction). The positive (+) side of the LEDs is the longer leg. Another way to identify the positive and the negative side of is to look at the sides of the LED and identify a flat edge. The flat edge corresponds to the negative side of the LED.
+
+The code necessary to blink the LED is described here below.
+
+The code that might throw and exception is enclosed within a *try* block. The exception handlers are associated by providing a *catch* block after the *try* block.
+
+     try {
+     		'try code'
+     } catch (ExceptionType name){
+     	'catch code'
+     	}
+     
+Each *catch* block handles the type of exception indicated by its argument. The argument *ExceptionType* must be the name of the class that inherits from the *Throwable* class. The handler can refer to the exception with *name*. The *catch* block contains code that is executed when the exception handler is invoked. 
+
+The following 'try code' and 'catch code' is used for the *activate* method:
+
+	 try {
+     		GpioController gpioController = GpioFactory.getInstance();
+						
+				while (!gpioController.getProvisionedPins().isEmpty()) 
+							gpioController.unprovisionPin(gpioController.getProvisionedPins().iterator().next());
+				
+				GpioPinDigitalOutput out = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_00, "LED1",PinState.LOW);
+				
+				System.out.println("'LED1' is connected to the GPIO_00 and it's blinking every 500ms");
+
+				schedule = scheduler.schedule(() -> {
+							boolean high = out.getState().isHigh();
+							out.setState(!high);
+						}, 500);
+     } catch (ExceptionType name){
+	   e.printStackTrace();
+	   }
+
+Exception handlers can do more then just print error messages or halt the program. They can do error recovery, prompt the user to make decision, or propagate the error up to a higher-level handler using [chained exceptions](https://docs.oracle.com/javase/tutorial/essential/exceptions/chained.html).
+
+The *activate* method is a static API. This loop is needed to clear out any pins that were already provisioned before, then the pin needs to be created while a specific GPIO is chosen (*GPIO00*). However, this code design has major issues in a shared environment. As a specific pin was chosen to control the LED, it is possible that other bundles assigns the same pin (*GPIO00*) for other purposes. In that case the new bundle clears the pin already claimed by the current bundle. 
+
+In the *deactivate* method, the open *schedule* should be closed.
+
+	 @Deactivate
+	 void deactivate() throws IOException {
+			 schedule.close();
+		     System.out.println("Goodbye World!");
+	 }
+
+and the following reference should be made
+
+	 @Reference
+	 void setScheduler(Scheduler scheduler) {
+			 this.scheduler = scheduler;
+	 }	 
 
 [1]: http://enroute.osgi.org/quick-start.html
 [2]: http://enroute.osgi.org/tutorial_base/800-ci.html

@@ -600,7 +600,7 @@ In order to trigger the build on *Travis IC* server, a change in the *tech.ghp.u
 			A bundle with a provider. Notice that this provider exports the API package. \
 			It also provides a JUnit test and it can be run standalone. \
 			\
-			#${warning;Please update this Bundle-Description in tech.ghp.upper.provider/bnd.bnd}
+			#${warning;Please update this Bundle-Description in tech.ghp.iot.domotica.provider/bnd.bnd}
 
 The change is *saved* and *pushed* to the *GitHub* server. The *Travis IC* notices the difference and launches a new automatic build of the repository.
 

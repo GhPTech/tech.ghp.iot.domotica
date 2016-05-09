@@ -166,44 +166,6 @@ The application is running at the address
     
 By pushing the button *To Upper* will transform the string inserted in the dialog window to upper case.
 
-###Debugging
-
-Debugging can be done by setting *breakpoints* and *single step*. A new bundle is generated and gets deployed with every change of the bundle. If changes are made to the code (and saved), a new bundle is generated and gets deployed. If more requirements are defined (or removed) in the *bndrun* file, the respective bundels get deployed (or stopped). 
-
-For example if a change is made to the code to return *lower case* string instead of *upper case*
-
-	 public String getUpper(RESTRequest req, String string) throws Exception {
-			return string.toLowerCase();
-	}
-
-the running framework will include this change.
-
-N.B.
-A warning from Eclipse informs about the changes. The *Continue* button should be pushed.
-
-If there are Javascript or html fragment changes, the page in the browser needs to be refreshed to reload the changes.
-
-Every application project has a *[project_name].bndrun* file and a *debug.bndrun* file.
-
-The principle 'Don't Repeat Yourself (DRY)' is applied. The *debug.bndrun* file inherits from the *[project_name].bndrun* file (information already available in the later file is aslo available in the former file) and it includes additional bundles supporting the debugging process. 
-
-As *debug.bndrun* inherits from *[project_name].bndrun*, it has no specified requirements in *Run Requirements*. However, the listed bundels to be added to the debug mode runtime  (*Run Bundles*) should be obtained by pushing *Resolve* button. This will add bundels like Web Console, XRay, etc.
-
-Once the *debug.bndrun* file is saved, the application can be run in debug mode by pushing the button *Debug OSGi*. This run in trace mode, which provides detailed information about the launch process and the ongoing updates. This is triggered by the *-runtrace* flag. This can be set to *false* or removed, if this information is not required.
-
-The *Web Console* can be accessed at the address:
-
-    http://localhost:8080/system/console
-
-The *ID* and the *password* are defined by Apache Felix as
-
-    User id: admin
-    Password: admin
-    
-These debugging tools provide valuable insights about the running application. For example, the running system can be inspected on a browser at the address:
-
-	 http://localhost:8080/system/console/xray
-
 ###Executable
 
 In order to run the application on an arbitrary environment, an executable JAR can be 
@@ -603,6 +565,161 @@ In order to trigger the build on *Travis IC* server, a change in the *tech.ghp.u
 			#${warning;Please update this Bundle-Description in tech.ghp.iot.domotica.provider/bnd.bnd}
 
 The change is *saved* and *pushed* to the *GitHub* server. The *Travis IC* notices the difference and launches a new automatic build of the repository.
+
+###Remote Debugging
+
+The *OSGi enRoute Application* creates also the files *tech.ghp.iot.bndrun* and *debug.bndrun*. The later inherits the former and adds debug bundles. The default (OSGi) port for *Http Server* is *8080*. However this can be changed in the *tech.ghp.iot.bndrun* file. For example to use the port *9090* for the *Http Server*, the following line needs to be added from the *Source* tab of the *tech.ghp.iot.bndrun*:
+
+    -runproperty: or.osgi.service.http.port = 9090 
+
+Additionally *-runpath* and *-runremote*  need to be specified:
+
+    -runpath: biz.aQute.remote.launcher
+    -runremote: \
+				pi; \
+				jdb=1044; \
+				host=192.168.x.xx; \
+				shell=-1
+				
+###Connecting to Raspberry Pi
+
+To connect to the *Raspebery Pi* the following command is used:
+
+    $ ssh pi@192.168.x.xx
+    
+To check the Java version (1.8.0 required) use the command:    
+    
+    pi@raspberry ! $java -version
+
+[Just Another Package for Java](https://jpm4j.org/#!/) needs to be installed on the *Raspberry Pi*:
+    
+    pi@raspberrypi ~ $ curl https://bndtools.ci.cloudbees.com/job/bnd.master/719/artifact/dist/bundles/biz.aQute.jpm.run/biz.aQute.jpm.run-3.0.0.jar >jpm.jar    
+    pi@raspberrypi ~ $ sudo java -jar jpm.jar init
+    pi@raspberry ~ $ jpm version
+
+*Remote debugging* from *bnd tools* requires and agent running on *Raspbery Pi*. For this purpose the package *biz.aQute.remote.main* needs to be installed:
+
+    pi@raspberrypi ~ $ sudo jpm install -f biz.aQute.remote.main@*
+    
+To launch the *bndremote* program in Java debug mode and listen to port 1044, the following command is used:
+    
+    pi@raspberrypi ~ $ sudo bndremote -n 192.168.x.xx
+    
+The *-n* option indicates the host on which the agent is run on. Alternatively the *-a* command can be employed:
+
+	 pi@raspberrypi ~ $ sudo bndremote -a
+	 
+The *-a* option indicates that *bndremote* should listen to all interfaces, not just localhost.
+
+If the interfaces to listen to are not specified, only the agent from the localhost (same machine) is used.
+
+###Rapberry Pi Command Code
+
+An instruction to send a message to Rapberry Pi is coded to the *DomoticaCommand* class: 
+
+    @Component
+	public class DomoticaCommand {
+
+			@Activate
+			void activate() {
+				System.out.println("Hello Raspberry Pi");
+			}
+
+			@Deactivate
+			void deactivate() {
+				System.out.println("Goodbye Raspberry Pi");
+			}
+	}
+
+###Defining a Runtime
+
+The requirements of the *runtime* need to be defined in the *tech.ghp.iot.bndrun* file. These can be defined from the *Run* tab. By default, the requirements are specified via annotations, the application *tech.ghp.iot.domotica.application* is listed in the initial requirements. Other bundles can be added from the *Browse Repos* list (the left side of the *Run* tab). 
+
+As the *Run Requirements* list is complete, the *Resolve* button needs to be pushed in order to get the bundles required by the runtime. This will set the *Run Bundles* list. The *-runbundles* section of the script is overwritten every time the *Resolve* button is pushed (manual editing of the *-runbundles* section would be lost).
+
+Save the file *tech.ghp.iot.domotica.bndrun*. 
+
+Push the button *Debug OSGi* at the right top of the window.
+
+The application is running at the address 
+
+    http://192.168.x.xx:8080/tech.ghp.iot.domotica
+    
+By pushing the button *To Upper* will transform the string inserted in the dialog window to upper case.
+
+###Debugging
+
+Debugging can be done by setting *breakpoints* and *single step*. A new bundle is generated and gets deployed with every change of the bundle. If changes are made to the code (and saved), a new bundle is generated and gets deployed. If more requirements are defined (or removed) in the *bndrun* file, the respective bundels get deployed (or stopped). 
+
+For example if a change is made to the code to return *lower case* string instead of *upper case*
+
+	 public String getUpper(RESTRequest req, String string) throws Exception {
+			return string.toLowerCase();
+	}
+
+the running framework will include this change.
+
+N.B.
+A warning from Eclipse informs about the changes. The *Continue* button should be pushed.
+
+If there are Javascript or html fragment changes, the page in the browser needs to be refreshed to reload the changes.
+
+Every application project has a *[project_name].bndrun* file and a *debug.bndrun* file.
+
+The principle 'Don't Repeat Yourself (DRY)' is applied. The *debug.bndrun* file inherits from the *[project_name].bndrun* file (information already available in the later file is aslo available in the former file) and it includes additional bundles supporting the debugging process. 
+
+As *debug.bndrun* inherits from *[project_name].bndrun*, it has no specified requirements in *Run Requirements*. However, the listed bundels to be added to the debug mode runtime  (*Run Bundles*) should be obtained by pushing *Resolve* button. This will add bundels like Web Console, XRay, etc.
+
+Once the *debug.bndrun* file is saved, the application can be run in debug mode by pushing the button *Debug OSGi*. This run in trace mode, which provides detailed information about the launch process and the ongoing updates. This is triggered by the *-runtrace* flag. This can be set to *false* or removed, if this information is not required.
+
+The *Web Console* can be accessed at the address:
+
+    http://192.168.x.xx:8080/system/console
+
+The *ID* and the *password* are defined by Apache Felix as
+
+    User id: admin
+    Password: admin
+    
+These debugging tools provide valuable insights about the running application. For example, a visualisation of the service layer can be obtained with the *XRay* web console plugin. The running system can be inspected on a browser at the address:
+
+	 http://192.168.x.xx:8080/system/console/xray
+	 
+![XRay](http://enroute.osgi.org/img/tutorial_base/debug-xray-1.png "A visualisation of the service layer can be obtained with the *XRay* web console plugin. ")
+
+The *triangle* represents the *service*. Connections to the *point* of the triangle indicate the *registration* (points to the object that receives the method calls from the service users). The *base* of the triangle indicate the *client(s)* (call the methods of the service). The *sides* of the triangle indicate *listeners* of the service.
+
+![service symbols](http://enroute.osgi.org/img/tutorial_base/debug-service-0.png "Graphical representation of services in XRay")
+
+The following color codes are used:
+
+* yellow: service is registered and in use
+* white, solid border: service is registered and not in use
+* white, dashed border: service is not registered and needed by other bundles
+* red: serious failure of the service
+* orange: service is exported or imported  
+
+The *triangles* represent service *types*, not *instances*.
+
+*XRay* also tracks eventual errors logged by the bundles. It marks the bundle with a warning sign and the log message.
+
+Various *tabs* and *subtabs* can be selected in order to get an overview of the running framework:
+
+* Main
+	* HTTP Service
+	* X-Ray
+* OSGi
+	* Bundles
+	* Configurations
+	* Log Service
+	* Services
+* Web Console 
+	* Licenses
+	* System Information
+	
+The *XRay* plugin returns a page with *Javascript* that pulls the server at given time intervals. The server returns the data which is rendered by a javascript library (d3.js).
+
+Each service type is represented by a rounded corner yellow box.	 
 
 [1]: http://enroute.osgi.org/quick-start.html
 [2]: http://enroute.osgi.org/tutorial_base/800-ci.html

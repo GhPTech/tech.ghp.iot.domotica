@@ -1,0 +1,31 @@
+#
+# TECH GHP IOT DOMOTICA APPLICATION APPLICATION
+#
+
+Bundle-Version: 1.0.0.${tstamp}
+Bundle-Description: \
+	This is the TECH GHP IOT DOMOTICA APPLICATION bundle. It carries the configuration for an application \
+	and provides some basic very much application specific stuff.  It provides a button \
+	that calls a REST function that turns a text into upper case. \
+	\
+	${warning;Please update this Bundle-Description in tech.ghp.iot.domotica.application/bnd.bnd}
+
+Private-Package:  \
+	tech.ghp.iot.domotica.application
+
+EnRoute-Application: 	tech.ghp.iot.domotica
+JPM-Command:			domotic
+
+-includeresource: \
+	{readme.md}, \
+	{configuration=configuration}, \
+	{static=static}, \
+	web=web
+
+-buildpath: \
+	osgi.enroute.base.api,\
+	biz.aQute.remote.main,\
+	tech.ghp.iot.domotica.api;version=latest
+	
+-testpath: \
+	osgi.enroute.junit.wrapper;version=4.12

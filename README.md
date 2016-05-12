@@ -5,7 +5,7 @@ This repository is a typical Internet of Things (IoT) application based on [OSGi
 
 The application is based on [OSGi enRoute IoT tutorial][7]. Its purpose is to control a hardware with the help of a [Raspbery Pi][8]. In this tutorial a LED is turned on and off based on an event triggered by a physical push-button and a programmed schedule.
 
-The chip [BCM2835][9] controls and gets input from hardware. The pins of this chip are assigned and registered with the [Pi4J GpioController][11]. The bundle [OSGi enRoute][11] bundle *osgi.enroute.iot.pi.provider* (a version of the [Pi4j][10] library) is employed for this purpose.
+The chip [BCM2835][9] controls and gets input from hardware. The pins of this chip are assigned and registered with the [Pi4J GpioController][11]. The bundle [OSGi enRoute][12] bundle *osgi.enroute.iot.pi.provider* (a version of the [Pi4j][10] library) is employed for this purpose.
 
 This tutorial shows how to develop a typical [Internet of Things (IoT)](https://en.wikipedia.org/wiki/Internet_of_Things "Internet of Thinks on Wikipedia") application for [Raspberry Pi](https://www.raspberrypi.org) based on the [OSGi enRoute template](http://enroute.osgi.org/tutorial_iot/050-start.html). 
 

@@ -7,31 +7,21 @@ The application is based on [OSGi enRoute IoT tutorial][7]. Its purpose is to co
 
 The chip [BCM2835][9] controls and gets input from hardware. The pins of this chip are assigned and registered with the [Pi4J GpioController][11]. The bundle [OSGi enRoute][12] bundle *osgi.enroute.iot.pi.provider* (a version of the [Pi4j][10] library) is employed for this purpose.
 
-This tutorial shows how to develop a typical [Internet of Things (IoT)](https://en.wikipedia.org/wiki/Internet_of_Things "Internet of Thinks on Wikipedia") application for [Raspberry Pi](https://www.raspberrypi.org) based on the [OSGi enRoute template](http://enroute.osgi.org/tutorial_iot/050-start.html). 
-
 ##Prerequisites
 
 The following software is needed:
-* [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-* [Eclipse Mars](https://www.eclipse.org/downloads/)
-* [Git] (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-* [Bndtools] (http://bndtools.org/installation.html#update-site) version 3.1.0 or later.
-
-Details on how to install *bndtools* can be found on the web site http://bndtools.org/installation.html
-
-*Bndtools* can  be installed from *Eclipse Marketplace*. Alternatively, it can be installed from:
-
-     https://dl.bintray.com/bndtools/bndtools/latest
-
-You can find the details how to install bndtools on the bndtools website
+* [Java 8][12]
+* [Eclipse Mars][13]
+* [Git][14]
+* [Bndtools][15] version 3.1.0 or later.
 
 The necessary hardware consist of:
 
-* Raspberry Pi 2 model B setup with [NOOBS]  (https://www.raspberrypi.org/blog/new-raspbian-and-noobs-releases/) (includes Java 1.8)
+* Raspberry Pi 2 model B setup with [NOOBS][16] (includes Java 1.8)
 * LEDs 
 * resistors \pm 220\Omega 
 * breadboard
-* buttons
+* push-buttons
 * male-female wires
 
 ##The Bnd Workspace
@@ -917,3 +907,8 @@ and the following reference should be made
 [9]:  https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2835/README.md
 [10]: http://pi4j.com
 [11]: http://pi4j.com/example/control.html
+[12]: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+[13]: https://www.eclipse.org/downloads/
+[14]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+[15]: http://bndtools.org/installation.html#update-site
+[16]: https://www.raspberrypi.org/blog/new-raspbian-and-noobs-releases/

@@ -10,8 +10,9 @@ Bundle-Description: 				\
 	\
 	${warning;Please update this Bundle-Description in tech.ghp.iot.domotica.provider/bnd.bnd}
 
-Private-Package:  \
-	tech.ghp.iot.domotica.provider
+Private-Package: \
+	tech.ghp.iot.domotica.provider,\
+	tech.ghp.iot.domotica.command
 	
 -buildpath: \
 	osgi.enroute.base.api;version=1.0,\

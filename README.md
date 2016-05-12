@@ -17,7 +17,7 @@ The following software is needed:
 
 The necessary hardware consist of:
 
-* Raspberry Pi 2 model B setup with [NOOBS][16] (includes Java 1.8)
+* Raspberry Pi 2 model B setup with [NOOBS][16]
 * LEDs 
 * resistors \pm 220\Omega 
 * breadboard
@@ -26,16 +26,16 @@ The necessary hardware consist of:
 
 ##The Bnd Workspace
 
-OSGi enRoute requires that the files belonging to a specific project are grouped in a *bnd workspace*. A *Bnd workspace* is a directory with a *cnf* folder and a number of projects. The *cnf* folder contains a *build.bnd* file and a *ext* directory which together define the workspace properties. A *Bnd workspace* is like a module; it imports bundles (and JARs) from a repository and it exports bundles to the same or another repository. On the inside we have projects that are private to the workspace. The projects should be cohesive so that they can share information via the *cnf* project.
+A *Bnd workspace* is a directory with a *cnf* folder and a number of projects. The *cnf* folder contains a *build.bnd* file and a *ext* directory which together define the workspace properties. The *Bnd workspace* is imports bundles (and JARs) from repositories and it exports bundles to the same or another repository. Within this folder, the projects are private and cohesive so that they can share information via the *cnf* project.
 
 ###The GitHub workspace
 
-The *GitHub workspace* is intended for sharing on [GitHub](https://github.com). The *bnd* template workspace can be obtained from [GitHub](https://github.com/GhPTech/workspace).
+The *GitHub workspace* is intended for sharing on [GitHub][17]. The *bnd* template workspace can be obtained from [OSGi worksapce repository on GitHub][18] or [GhPTech worksapce repository on GitHub][19].
 
 	 $ cd  ~/git
 	 $ git init tech.ghp.iot.domotica
 	 $ cd tech.ghp.iot.domotica
-	 $ git fetch --depth=1 https://github.com/GhPTech/workspace master
+	 $ git fetch --depth=1 https://github.com/osgi/workspace master
 	 $ git checkout FETCH_HEAD -- .
 
 ###The Eclipse workspace
@@ -52,7 +52,7 @@ In order to get the *Workbench* view, push the *Workbench* button from On the to
 
 ###Import the *Bnd Workspace*
 
-The best way to work with projects in Eclipse is to not store them in the Eclipse workspace folder but import them from the *GitHub workspace*.
+The recommended way to work with projects in Eclipse is to not store them in the Eclipse workspace folder but import them from the *~\git* workspace.
 
 From the context menu (right click) select 
 	 
@@ -61,8 +61,6 @@ From the context menu (right click) select
 then select the corresponding *Bnd Workspace* from *GitHub*. For the present tutorial, the following path:
 
 *~/git/tech.ghp.iot.domotica*
-    
-Finish the import process,by pushing the *Finish* button.
 
 This will import the cnf project into your Eclipse workspace.
 
@@ -79,7 +77,7 @@ From main menu select *File/New/Bndtools Projects*. Select the *OSGI enRoute* te
 
 ###Code
 
-The OSGI enRoute template drafts the source code for the application in the file */src/DomoticaApplication.java*.
+The OSGI enRoute template provides a template source code for the application in the file */src/DomoticaApplication.java*.
 
 	 package tech.ghp.iot.domotica.application;
 	 
@@ -112,10 +110,7 @@ The *getUpper* method is for the *GET* method and it is mapped from the /rest/up
 
 ###HTML resources
 
-Some static resources for the *Javascript code* and *CSS* are also needed for the web application. 
-
-
-The resources from this application are stored in the directory *static* (included in the bundle). These resources are directly mapped to the root, i.e. a resource with the path *static/abc/def* will be available as */abc/def*. 
+Some static resources for the *Javascript code* and *CSS* are also provided for the web application, stored in the directory *~/static*. These resources are directly mapped to the root, i.e. a resource with the path *static/abc/def* will be available as */abc/def*. 
 
 The recommendation is to create a static direction with the application PID name in static.
 
@@ -158,83 +153,9 @@ Push the button *Debug OSGi* at the right top of the window.
 
 The application is running at the address 
 
-    http://localhost:8080/tech.ghp.iot.domotica
+    http://192.168.x.xx:8080/tech.ghp.iot.domotica
     
 By pushing the button *To Upper* will transform the string inserted in the dialog window to upper case.
-
-###Debugging
-
-Debugging can be done by setting *breakpoints* and *single step*. A new bundle is generated and gets deployed with every change of the bundle. If changes are made to the code (and saved), a new bundle is generated and gets deployed. If more requirements are defined (or removed) in the *bndrun* file, the respective bundels get deployed (or stopped). 
-
-For example if a change is made to the code to return *lower case* string instead of *upper case*
-
-	 public String getUpper(RESTRequest req, String string) throws Exception {
-			return string.toLowerCase();
-	}
-
-the running framework will include this change.
-
-N.B.
-A warning from Eclipse informs about the changes. The *Continue* button should be pushed.
-
-If there are Javascript or html fragment changes, the page in the browser needs to be refreshed to reload the changes.
-
-Every application project has a *[project_name].bndrun* file and a *debug.bndrun* file.
-
-The principle 'Don't Repeat Yourself (DRY)' is applied. The *debug.bndrun* file inherits from the *[project_name].bndrun* file (information already available in the later file is aslo available in the former file) and it includes additional bundles supporting the debugging process. 
-
-As *debug.bndrun* inherits from *[project_name].bndrun*, it has no specified requirements in *Run Requirements*. However, the listed bundels to be added to the debug mode runtime  (*Run Bundles*) should be obtained by pushing *Resolve* button. This will add bundels like Web Console, XRay, etc.
-
-Once the *debug.bndrun* file is saved, the application can be run in debug mode by pushing the button *Debug OSGi*. This run in trace mode, which provides detailed information about the launch process and the ongoing updates. This is triggered by the *-runtrace* flag. This can be set to *false* or removed, if this information is not required.
-
-The *Web Console* can be accessed at the address:
-
-    http://192.168.x.xx:8080/system/console
-
-The *ID* and the *password* are defined by Apache Felix as
-
-    User id: admin
-    Password: admin
-    
-These debugging tools provide valuable insights about the running application. For example, a visualisation of the service layer can be obtained with the *XRay* web console plugin. The running system can be inspected on a browser at the address:
-
-	 http://192.168.x.xx:8080/system/console/xray
-	 
-![XRay](http://enroute.osgi.org/img/tutorial_base/debug-xray-1.png "A visualisation of the service layer can be obtained with the *XRay* web console plugin. ")
-
-The *triangle* represents the *service*. Connections to the *point* of the triangle indicate the *registration* (points to the object that receives the method calls from the service users). The *base* of the triangle indicate the *client(s)* (call the methods of the service). The *sides* of the triangle indicate *listeners* of the service.
-
-![service symbols](http://enroute.osgi.org/img/tutorial_base/debug-service-0.png "Graphical representation of services in XRay")
-
-The following color codes are used:
-
-* yellow: service is registered and in use
-* white, solid border: service is registered and not in use
-* white, dashed border: service is not registered and needed by other bundles
-* red: serious failure of the service
-* orange: service is exported or imported  
-
-The *triangles* represent service *types*, not *instances*.
-
-*XRay* also tracks eventual errors logged by the bundles. It marks the bundle with a warning sign and the log message.
-
-Various *tabs* and *subtabs* can be selected in order to get an overview of the running framework:
-
-* Main
-	* HTTP Service
-	* X-Ray
-* OSGi
-	* Bundles
-	* Configurations
-	* Log Service
-	* Services
-* Web Console 
-	* Licenses
-	* System Information
-	
-The *XRay* plugin returns a page with *Javascript* that pulls the server at given time intervals. The server returns the data which is rendered by a javascript library (d3.js).
-
-Each service type is represented by a rounded corner yellow box.
 
 ###Executable
 
@@ -259,13 +180,13 @@ The executable JAR can be run with the command:
     
 The application can be used/accessed from the address:
 
-    http://localhost:8080/tech.ghp.iot.domotica
+    http://192.168.x.xx:8080/tech.ghp.iot.domotica
 
 To stop the application do *Control-C* at the command line.
 
     ^C
 
-##Separate functionality
+##Service structure
 
 The purpose of the *DomoticaApplication* class is to be an interface of the underlying services. It is not recommended to provide functionality to such interfaces. 
 
@@ -275,7 +196,6 @@ The purpose of the *DomoticaApplication* class is to be an interface of the unde
 * API projects *.api*, defines the service
 * Provider projects *.provider*, *.adapter*, implements a project
 * Test Projects *.test*, runs tests inside the framework
-
 
 ###API Project
 
@@ -306,7 +226,6 @@ The *OSGI enRoute* template creates a project with all the options set to treat 
 	
 	 	String upper(String input);
 	}
-
 
 In the *generated* folder of the project, the file *tech.ghp.iot.domotica.api.jar* is created. This file contains the *Manifest*, which was generated by *bnd*. 
 The *Manifest* shows that the package *tech.ghp.iot.domotica.api* is exported. This means that this package is available for other bundles. The *Contents* tab of the *bnd.bnd* file shows the *Export packages* list.  
@@ -607,8 +526,8 @@ In order to connect to the local repository *!/git/tech.ghp.iot.domotica*, the '
 
     $ cd ~/git/tech.ghp.iot.domotica
 	$ git add .
-	$ git commit -m "first commit"
-	$ git remote add origin git@github.com:GhPTech/tech.ghp.iot.domotica.git
+	$ git commit -m "message associated with the commit"
+	$ git remote add origin https://github.com/GhPTech/tech.ghp.iot.domotica.git
 	$ git push -u origin master
 
 For further commits and pushes the following commands are used:
@@ -617,7 +536,7 @@ For further commits and pushes the following commands are used:
 	$ git commit -m "[commit message]"
 	$ git push -u origin master
 
-#Continous Integration
+###Continous Integration
 
 The *bnd workspace* is setup to be built continuously with *Travis CI*. 
 
@@ -636,21 +555,80 @@ In order to trigger the build on *Travis IC* server, a change in the *tech.ghp.u
 
 The change is *saved* and *pushed* to the *GitHub* server. The *Travis IC* notices the difference and launches a new automatic build of the repository.
 
-##Remote Debugging
+##Debugging
 
-The *OSGi enRoute Application* creates also the files *tech.ghp.iot.bndrun* and *debug.bndrun*. The later inherits the former and adds debug bundles. The default (OSGi) port for *Http Server* is *8080*. However this can be changed in the *tech.ghp.iot.bndrun* file. For example to use the port *9090* for the *Http Server*, the following line needs to be added from the *Source* tab of the *tech.ghp.iot.bndrun*:
+Debugging can be done by setting *breakpoints* and *single step*. A new bundle is generated and gets deployed with every change of the bundle. If changes are made to the code (and saved), a new bundle is generated and gets deployed. If more requirements are defined (or removed) in the *bndrun* file, the respective bundels get deployed (or stopped). 
 
-    -runproperty: or.osgi.service.http.port = 9090 
+For example if a change is made to the code to return *lower case* string instead of *upper case*
 
-Additionally *-runpath* and *-runremote*  need to be specified:
+	 public String getUpper(RESTRequest req, String string) throws Exception {
+			return string.toLowerCase();
+	}
 
-    -runpath: biz.aQute.remote.launcher
-    -runremote: \
-				pi; \
-				jdb=1044; \
-				host=192.168.x.xx; \
-				shell=-1
-				
+the running framework will include this change.
+
+N.B.
+A warning from Eclipse informs about the changes. The *Continue* button should be pushed.
+
+If there are Javascript or html fragment changes, the page in the browser needs to be refreshed to reload the changes.
+
+Every application project has a *[project_name].bndrun* file and a *debug.bndrun* file.
+
+The principle 'Don't Repeat Yourself (DRY)' is applied. The *debug.bndrun* file inherits from the *[project_name].bndrun* file (information already available in the later file is aslo available in the former file) and it includes additional bundles supporting the debugging process. 
+
+As *debug.bndrun* inherits from *[project_name].bndrun*, it has no specified requirements in *Run Requirements*. However, the listed bundels to be added to the debug mode runtime  (*Run Bundles*) should be obtained by pushing *Resolve* button. This will add bundels like Web Console, XRay, etc.
+
+Once the *debug.bndrun* file is saved, the application can be run in debug mode by pushing the button *Debug OSGi*. This run in trace mode, which provides detailed information about the launch process and the ongoing updates. This is triggered by the *-runtrace* flag. This can be set to *false* or removed, if this information is not required.
+
+The *Web Console* can be accessed at the address:
+
+    http://192.168.x.xx:8080/system/console
+
+The *ID* and the *password* are defined by Apache Felix as
+
+    User id: admin
+    Password: admin
+    
+These debugging tools provide valuable insights about the running application. For example, a visualisation of the service layer can be obtained with the *XRay* web console plugin. The running system can be inspected on a browser at the address:
+
+	 http://192.168.x.xx:8080/system/console/xray
+	 
+![XRay](http://enroute.osgi.org/img/tutorial_base/debug-xray-1.png "A visualisation of the service layer can be obtained with the *XRay* web console plugin. ")
+
+The *triangle* represents the *service*. Connections to the *point* of the triangle indicate the *registration* (points to the object that receives the method calls from the service users). The *base* of the triangle indicate the *client(s)* (call the methods of the service). The *sides* of the triangle indicate *listeners* of the service.
+
+![service symbols](http://enroute.osgi.org/img/tutorial_base/debug-service-0.png "Graphical representation of services in XRay")
+
+The following color codes are used:
+
+* yellow: service is registered and in use
+* white, solid border: service is registered and not in use
+* white, dashed border: service is not registered and needed by other bundles
+* red: serious failure of the service
+* orange: service is exported or imported  
+
+The *triangles* represent service *types*, not *instances*.
+
+*XRay* also tracks eventual errors logged by the bundles. It marks the bundle with a warning sign and the log message.
+
+Various *tabs* and *subtabs* can be selected in order to get an overview of the running framework:
+
+* Main
+	* HTTP Service
+	* X-Ray
+* OSGi
+	* Bundles
+	* Configurations
+	* Log Service
+	* Services
+* Web Console 
+	* Licenses
+	* System Information
+	
+The *XRay* plugin returns a page with *Javascript* that pulls the server at given time intervals. The server returns the data which is rendered by a javascript library (d3.js).
+
+Each service type is represented by a rounded corner yellow box.
+
 ##Connecting to Raspberry Pi
 
 To connect to the *Raspebery Pi* the following command is used:
@@ -683,6 +661,25 @@ The *-a* option indicates that *bndremote* should listen to all interfaces, not 
 
 If the interfaces to listen to are not specified, only the agent from the localhost (same machine) is used.
 
+##Remote Debugging
+
+The *OSGi enRoute Application* creates also the files *tech.ghp.iot.bndrun* and *debug.bndrun*. The later inherits the former and adds debug bundles. The default (OSGi) port for *Http Server* is *8080*. However this can be changed in the *tech.ghp.iot.bndrun* file. For example to use the port *9090* for the *Http Server*, the following line needs to be added from the *Source* tab of the *tech.ghp.iot.bndrun*:
+
+    -runproperty: or.osgi.service.http.port = 9090 
+
+Additionally *-runpath* and *-runremote*  need to be specified:
+
+    -runpath: biz.aQute.remote.launcher
+    -runremote: \
+				pi; \
+				jdb=1044; \
+				host=192.168.x.xx; \
+				shell=-1
+				 
+N.B. The remote debugging specifications such as *-runpath: biz.aQute.remote.launcher* is compatible only with the *Debug As: Bnd Native Launcher* mode. The options *Run As* mode, *Run OSGi*, *Debug OSGi* *Export* or *Export* modes generate errors at the runtime such as     
+
+    Error: Could not find or load main class.  
+
 ##Command Package
 
 The *OSGi enRoute* template creates a class *DomoticaApplication* within the package *tech.ghp.iot.domotica.application*, which is a web application with REST. However, another component is created to communicate with the hardware (Rapberry Pi). 
@@ -693,7 +690,7 @@ From the main menu select
 
 and name the package *tech.ghp.iot.domotica.command*
 
-Within this package create a new Java class *DomoticaCommand*, which has the following code by default:
+Within this package create a new Java class *DomoticaCommand*. The newly created class has the following code by default:
 
     package tech.ghp.iot.domotica.command;
 
@@ -703,34 +700,44 @@ Within this package create a new Java class *DomoticaCommand*, which has the fol
 
 The *DomoticaCommand* package has to be added to the *Private Packages* list of the *bnd.bnd* file.
 
-###Sending a message to Raspberry Pi
+###Component annotation
 
-A simple way to interact with hardware is to send a message to the remote agent. 
+The annotation *@Component* is necessary befor the declaration of the class
 
-To send this message to Raspbery Pi, the following code is implemented in the class 'DomoticaCommand'
+	 @Component
+	 public class DomoticaCommand {
+	 ...
 
-    package tech.ghp.iot.domotica.command;
-    
-    import org.osgi.service.component.annotations.Activate;
-	import org.osgi.service.component.annotations.Component;
-	import org.osgi.service.component.annotations.Deactivate;
+The annotation *Component* need to be imported from *org.osgi.service.component.annotations*
+	 
+	 import org.osgi.service.component.annotations.Component;
+
+###Sending a message from Raspberry Pi
+
+A simple way to interact with hardware is to send a message from the remote agent. 
     
     @Component
     public class DomoticaCommand {
     
     		@Activate
 			void activate() {
-					System.out.println("Hello Rasberry Pi");
+					System.out.println("Hello!");
 			}
 
 			@Deactivate
 	 		void deactivate() {
-					System.out.println("Goodbye Rasberry Pi");
+					System.out.println("Goodbye!");
 			}
 
 	 }
 
-The dependencies of this application to be *Resolved* from the *Run* tab of the *debug.bndrun* (*tech.ghp.iot.domotica.bndrun*) file. 
+The annotations *Activate* and *Deactivate* needs to be imported from *org.osgi.service.component.annotations*.
+
+	 import org.osgi.service.component.annotations.Activate;
+	 import org.osgi.service.component.annotations.Deactivate;
+
+
+The dependencies of this application to be *Resolved* from the *Run* tab of the  *tech.ghp.iot.domotica.bndrun* and *debug.bndrun* specifications. 
 
 To launch the application, from the context menu (right click) of the *debug.bndrun* file, select
 
@@ -738,9 +745,7 @@ To launch the application, from the context menu (right click) of the *debug.bnd
 
 This cause *bnd* to start the debugger and look for a remote agent on the specified host.
 
-N.B. Rasberry Pi (IP 192.168.x.xx) should run running *bndremote* and displaying the message: 
-
-The ssh shell of the Raspbery Pi should display the following message:
+N.B. The remote agent (192.168.x.xx) should be running *bndremote* and display the message: 
 
     Listening for transport dt_socket at address: 1044
 
@@ -753,22 +758,19 @@ The ssh shell of the Raspbery Pi should display the following message:
 	2016-04-12 10:52:45.945:INFO:oejs.Server:pool-3-thread-2: Started @2715197ms
 	2016-04-12 10:52:46.286:INFO:oejs.ServerConnector:pool-3-thread-2: Started ServerConnector@782931{HTTP/1.1}{0.0.0.0:8080}
 	[INFO] Started Jetty 9.2.12.v20150709 at port(s) HTTP:8080 on context path /
-	Hello Rasberry Pi
+	Hello!
 
 ###Continous update
 
 While the remote agent is running, changes can be made to the application. For example we can modify the message sent to Raspberry Pi.
 
 	 @Activate
-			void activate() {
-					System.out.println("Hello Rasberry Pi");
-					System.out.println("What is your serial number?");
-			}
+	 void activate() {
+	 		System.out.println("Hello! ");
+	 		System.out.println("I am a Raspberry Pi ");
+	 }
 			
-As the changes are saved, the launcher reloads and calculates a *delta* of the proprieties file (bnd.bnd) and applies it to the running framework and the updated messages are update on the display
-
-	 Hello Rasberry Pi
-	 What is your serial number?
+As the changes are saved, the launcher reloads and calculates a *delta* of the proprieties file (bnd.bnd) and applies it to the running framework and the updated messages are update on the command line of the remote agent.
 
 ##Getting information from Raspberry Pi
 
@@ -782,7 +784,6 @@ The bundle *osgi.enroute.iot.pi.provider* can be found in the *Respositories* li
     osgi.identity;filter:='(osgi.identity=tech.ghp.iot.domotica.application)',\
     osgi.identity;filter:='(osgi.identity=osgi.enroute.iot.pi.provider)'
 
-
 Once this modification is saved to the file *bnd.bnd*, from the *debug.bndrun* file, the dependencies need to be *Resolved*.
 
 ###Access to GpioController types
@@ -794,7 +795,8 @@ The *GpioController* types also need to be added to the *buidpath* of the 'bnd.b
 			osgi.enroute.logger.simple.provider,\
 			osgi.enroute.web.simple.provider;version=1.2,\
 			osgi.enroute.iot.circuit.provider,\
-			osgi.enroute.iot.pi.provider
+			osgi.enroute.iot.pi.provider,\
+			tech.ghp.iot.domotica.api
 			
 			
 ###Throwing exceptions
@@ -809,25 +811,25 @@ Notification of these exceptions can be coded as:
     ...
     }
     
-###Getting serial number
+###Getting the board type
     
-The serial number can be obtained by the following code line:
+The board type can be obtained by the following code line:
 	 
     ...
-	System.out.println("Serial number is " + SystemInfo.getSerial());	
+	System.out.println("I am a Rasberry Pi "+ SystemInfo.getBoardType().name());	
 	...		
 	
-###Getting model
+###Getting serial number
     
 The model can be obtained by the following code line:
 	 
     ...
-	System.out.println("Model: " + SystemInfo.getBoardType().name());
+	System.out.println("Serial " + SystemInfo.getSerial());
 	...		
 
-##Controlling hardware with Raspberry Pi
+###Blinking a LED
 
-A simple example of hardware control with Raspberry Pi is blinking a LED. The schema for this scenario is shown here below:
+Blinking a LED is a trivial example of hardware control. The schema for this scenario is shown here below:
 
 ![Blinking LED schema](http://enroute.osgi.org/img/tutorial_iot/exploring-led-schema-1.png "Blinking LED schema (with Fritzing)")
 
@@ -851,9 +853,7 @@ The code that might throw and exception is enclosed within a *try* block. The ex
 
      try {
      		'try code'
-     } catch (ExceptionType name){
-     	'catch code'
-     	}
+     } catch (ExceptionType name){'catch code'}
      
 Each *catch* block handles the type of exception indicated by its argument. The argument *ExceptionType* must be the name of the class that inherits from the *Throwable* class. The handler can refer to the exception with *name*. The *catch* block contains code that is executed when the exception handler is invoked. 
 
@@ -868,14 +868,7 @@ The following 'try code' and 'catch code' is used for the *activate* method:
 				GpioPinDigitalOutput out = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_00, "LED1",PinState.LOW);
 				
 				System.out.println("'LED1' is connected to the GPIO_00 and it's blinking every 500ms");
-
-				schedule = scheduler.schedule(() -> {
-							boolean high = out.getState().isHigh();
-							out.setState(!high);
-						}, 500);
-     } catch (ExceptionType name){
-	   e.printStackTrace();
-	   }
+		} catch (Exception e) {e.printStackTrace();}
 
 Exception handlers can do more then just print error messages or halt the program. They can do error recovery, prompt the user to make decision, or propagate the error up to a higher-level handler using [chained exceptions](https://docs.oracle.com/javase/tutorial/essential/exceptions/chained.html).
 
@@ -912,3 +905,6 @@ and the following reference should be made
 [14]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 [15]: http://bndtools.org/installation.html#update-site
 [16]: https://www.raspberrypi.org/blog/new-raspbian-and-noobs-releases/
+[17]: https://github.com
+[18]: https://github.com/osgi/workspace
+[19]: https://github.com/GhPTech/workspace

@@ -874,6 +874,20 @@ Exception handlers can do more then just print error messages or halt the progra
 
 The *activate* method is a static API. This loop is needed to clear out any pins that were already provisioned before, then the pin needs to be created while a specific GPIO is chosen (*GPIO00*). However, this code design has major issues in a shared environment. As a specific pin was chosen to control the LED, it is possible that other bundles assigns the same pin (*GPIO00*) for other purposes. In that case the new bundle clears the pin already claimed by the current bundle. 
 
+A *schedule* and a *scheduler* are used to set the state of the pin *GPI_00*. The state is set to *true* and *false* every 1000 milliseconds.
+
+	 private Scheduler scheduler;
+	 private Closeable schedule;
+
+	 ...
+
+	 schedule = scheduler.schedule(() -> {
+			boolean high = out.getState().isHigh();
+			out.setState(!high);
+			}, 1000);
+			
+	 ...		
+
 In the *deactivate* method, the open *schedule* should be closed.
 
 	 @Deactivate
@@ -882,7 +896,7 @@ In the *deactivate* method, the open *schedule* should be closed.
 		     System.out.println("Goodbye World!");
 	 }
 
-and the following reference should be made
+The reference to *scheduler* should also be made
 
 	 @Reference
 	 void setScheduler(Scheduler scheduler) {
